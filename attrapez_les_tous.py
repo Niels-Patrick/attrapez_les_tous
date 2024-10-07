@@ -45,7 +45,7 @@ def get_pokemon_info(pokemon_id):
         response = requests.get(url)
         response.raise_for_status()  # Checking if the requests worked
         data = response.json()
-        # Fetching the import stats for battles
+        # Fetching the stats for battles
         return {
             'name': data['name'],
             'hp': data['stats'][0]['base_stat'],
