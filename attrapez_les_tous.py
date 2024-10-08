@@ -88,20 +88,27 @@ def run_tournament(pokemon_list):
     Parameters:
     pokemon_list: a list containing the 16 chosen Pokemon
     '''
-    round_number = 1
-    while len(pokemon_list) > 1:
-        print(f"\n--- Round {round_number} ---")
-        next_round = []
-        for i in range(0, len(pokemon_list), 2):
-            winner = battle(pokemon_list[i], pokemon_list[i+1], round_number)
-            next_round.append(winner)
-            time.sleep(1)
-        pokemon_list = next_round
-        round_number += 1
+    try:
+        round_number = 1 # Round counter
 
-    champion = pokemon_list[0]
-    print(f"\n--- The Champion is {champion['name'].capitalize()}! ---")
-    display_winner(champion)
+        # Round loop
+        while len(pokemon_list) > 1:
+            print(f"\n--- Round {round_number} ---")
+            next_round = [] # Temporary list to store the current round winners
+            # Battle loop for the current round
+            for i in range(0, len(pokemon_list), 2):
+                winner = battle(pokemon_list[i], pokemon_list[i+1], round_number)
+                next_round.append(winner)
+                time.sleep(1)
+            pokemon_list = next_round
+            round_number += 1
+
+        # Displaying the tournament winner
+        champion = pokemon_list[0]
+        print(f"\n--- The Champion is {champion['name'].capitalize()}! ---")
+        display_winner(champion)
+    except:
+        print("An error occurred.")
 
 def battle(pokemon1, pokemon2, round_number):
     '''
@@ -114,117 +121,149 @@ def battle(pokemon1, pokemon2, round_number):
     Return:
     pokemon1 OR pokemon2 depending on the result of the battle
     '''
-    # Calculating the score of each Pokemon based on their stats
-    score1 = (pokemon1['attack'] + pokemon1['hp'] + pokemon1['speed']) - pokemon2['defense']
-    score2 = (pokemon2['attack'] + pokemon2['hp'] + pokemon2['speed']) - pokemon1['defense']
+    try:
+        # Calculating the score of each Pokemon based on their stats
+        score1 = (pokemon1['attack'] + pokemon1['hp'] + pokemon1['speed']) - pokemon2['defense']
+        score2 = (pokemon2['attack'] + pokemon2['hp'] + pokemon2['speed']) - pokemon1['defense']
 
-    for type1 in pokemon1['type']:
-        for type2 in pokemon2['type']:
-            # Checking if the type and the modifier against the other type is present in type_advantage
-            # If not, there is not modifier for the current type against the other current type
-            if type1 in type_advantages and type2 in type_advantages[type1]:
-                score1 *= type_advantages[type1][type2]
-            if type2 in type_advantages and type1 in type_advantages[type2]:
-                score2 *= type_advantages[type2][type1]
+        for type1 in pokemon1['type']:
+            for type2 in pokemon2['type']:
+                # Checking if the type and the modifier against the other type is present in type_advantage
+                # If not, there is not modifier for the current type against the other current type
+                if type1 in type_advantages and type2 in type_advantages[type1]:
+                    score1 *= type_advantages[type1][type2]
+                if type2 in type_advantages and type1 in type_advantages[type2]:
+                    score2 *= type_advantages[type2][type1]
 
-    print(f"{pokemon1['name'].capitalize()} vs {pokemon2['name'].capitalize()}!")
-    display_battle(pokemon1, pokemon2, score1, score2, round_number)
+        print(f"{pokemon1['name'].capitalize()} vs {pokemon2['name'].capitalize()}!")
+        display_battle(pokemon1, pokemon2, score1, score2, round_number)
 
-    # Determining the winner
-    if score1 > score2:
-        print(f"{pokemon1['name'].capitalize()} wins!")
-        return pokemon1
-    elif score2 > score1:
-        print(f"{pokemon2['name'].capitalize()} wins!")
-        return pokemon2
-    else:
-        # If they are at a stale, the Pokemon with the highest speed wins
-        if pokemon1['speed'] > pokemon2['speed']:
-            print(f"{pokemon1['name'].capitalize()} wins by speed tie!")
+        # Determining the winner
+        if score1 > score2:
+            print(f"{pokemon1['name'].capitalize()} wins!")
             return pokemon1
-        else:
-            print(f"{pokemon2['name'].capitalize()} wins by speed tie!")
+        elif score2 > score1:
+            print(f"{pokemon2['name'].capitalize()} wins!")
             return pokemon2
+        else:
+            # If they are at a stale, the Pokemon with the highest speed wins
+            if pokemon1['speed'] > pokemon2['speed']:
+                print(f"{pokemon1['name'].capitalize()} wins by speed tie!")
+                return pokemon1
+            else:
+                print(f"{pokemon2['name'].capitalize()} wins by speed tie!")
+                return pokemon2
+    except:
+        print("An error occurred.")
+        return None
         
 def display_battle(pokemon1, pokemon2, score1, score2, round_number):
-    window = tk.Tk()
-    window.geometry("1000x200")
-    window.title("Pokémon Battle")
+    '''
+    Using the library Tkinter, generates a window displaying the current Pokemon battle
 
-    round_label = tk.Label(window, text=f"Round {round_number}", font=("Arial, 18"))
-    round_label.pack()
-    
-    url1 = pokemon1['sprite']
-    url2 = pokemon2['sprite']
-    # Opening the pictures from the URL and allows to read them online
-    image1 = Image.open(BytesIO(urllib.request.urlopen(url1).read()))
-    image2 = Image.open(BytesIO(urllib.request.urlopen(url2).read()))
-    # Converting the pictures to display them on Tkinter 
-    photo1 = ImageTk.PhotoImage(image1)
-    photo2 = ImageTk.PhotoImage(image2)
+    Parameters:
+    pokemon1: the information of the first Pokemon
+    pokemon2: the information of the second Pokemon
+    score1: the battle score of the first Pokemon against the second one
+    score2: the battle score of the second Pokemon against the first one
+    round_number: the number of the current round
+    '''
+    try:
+        window = tk.Tk()
+        window.geometry("1000x200")
+        window.title("Pokémon Battle")
 
-    # Displaying the first Pokemon picture
-    img_label1 = tk.Label(window, image=photo1)
-    img_label1.pack(side="left", padx=10)
-    # Displaying the second Pokemon picture
-    img_label2 = tk.Label(window, image=photo2)
-    img_label2.pack(side="right", padx=10)
+        round_label = tk.Label(window, text=f"Round {round_number}", font=("Arial, 18"))
+        round_label.pack()
+        
+        url1 = pokemon1['sprite']
+        url2 = pokemon2['sprite']
+        # Opening the pictures from the URL and allows to read them online
+        image1 = Image.open(BytesIO(urllib.request.urlopen(url1).read()))
+        image2 = Image.open(BytesIO(urllib.request.urlopen(url2).read()))
+        # Converting the pictures to display them on Tkinter 
+        photo1 = ImageTk.PhotoImage(image1)
+        photo2 = ImageTk.PhotoImage(image2)
 
-    label = tk.Label(window, text=f"{pokemon1['name'].capitalize()} vs {pokemon2['name'].capitalize()}!", font=("Arial", 16))
-    label.pack()
+        # Displaying the first Pokemon picture
+        img_label1 = tk.Label(window, image=photo1)
+        img_label1.pack(side="left", padx=10)
+        # Displaying the second Pokemon picture
+        img_label2 = tk.Label(window, image=photo2)
+        img_label2.pack(side="right", padx=10)
 
-    type_label1 = tk.Label(window, text=f"Type: {', '.join(pokemon1['type'])}", font=("Arial", 12))
-    type_label1.pack(side="left", padx=10, pady=10)
+        label = tk.Label(window, text=f"{pokemon1['name'].capitalize()} vs {pokemon2['name'].capitalize()}!", font=("Arial", 16))
+        label.pack()
 
-    type_label2 = tk.Label(window, text=f"Type: {', '.join(pokemon2['type'])}", font=("Arial", 12))
-    type_label2.pack(side="right", padx=10, pady=10)
+        type_label1 = tk.Label(window, text=f"Type: {', '.join(pokemon1['type'])}", font=("Arial", 12))
+        type_label1.pack(side="left", padx=10, pady=10)
 
-    score_label = tk.Label(window, text=f"{pokemon1['name'].capitalize()}: {score1:.2f} vs {pokemon2['name'].capitalize()}: {score2:.2f}", font=("Arial", 14))
-    score_label.pack()
+        type_label2 = tk.Label(window, text=f"Type: {', '.join(pokemon2['type'])}", font=("Arial", 12))
+        type_label2.pack(side="right", padx=10, pady=10)
 
-    winner_name = pokemon1['name'].capitalize() if score1 > score2 else pokemon2['name'].capitalize()
-    winner_label = tk.Label(window, text=f"Winner: {winner_name}", font=("Arial", 14))
-    winner_label.pack()
+        score_label = tk.Label(window, text=f"{pokemon1['name'].capitalize()}: {score1:.2f} vs {pokemon2['name'].capitalize()}: {score2:.2f}", font=("Arial", 14))
+        score_label.pack()
 
-    # Attendre un peu avant de fermer la fenêtre pour que l'utilisateur ait le temps de voir le résultat
-    window.after(5000, window.destroy)
-    window.mainloop()
+        winner_name = pokemon1['name'].capitalize() if score1 > score2 else pokemon2['name'].capitalize()
+        winner_label = tk.Label(window, text=f"Winner: {winner_name}", font=("Arial", 14))
+        winner_label.pack()
+
+        # Waiting a bit before closing the window, to give enough time to the user to read the content
+        window.after(5000, window.destroy)
+        window.mainloop()
+    except:
+        print("An error occurred.")
 
 def display_winner(champion):
-    window = tk.Tk()
-    window.geometry("1000x200")
-    window.title("Tournament Winner")
+    '''
+    Using the library Tkinter, generates a window displaying the tournament winner
 
-    url = champion['sprite']
-    # Opening the picture from the URL and allows to read it online
-    image = Image.open(BytesIO(urllib.request.urlopen(url).read()))
-    # Converting the picture to display it on Tkinter 
-    photo = ImageTk.PhotoImage(image)
-    # Displaying the winner picture
-    img_label = tk.Label(window, image=photo)
-    img_label.pack(pady=10)
+    Parameters:
+    champion: the information of the Pokemon who won the tournament
+    '''
+    try:
+        window = tk.Tk()
+        window.geometry("1000x200")
+        window.title("Tournament Winner")
 
-    label = tk.Label(window, text=f"The winner is {champion['name'].capitalize()}!", font=("Arial", 16))
-    label.pack()
+        url = champion['sprite']
+        # Opening the picture from the URL and allows to read it online
+        image = Image.open(BytesIO(urllib.request.urlopen(url).read()))
+        # Converting the picture to display it on Tkinter 
+        photo = ImageTk.PhotoImage(image)
+        # Displaying the winner picture
+        img_label = tk.Label(window, image=photo)
+        img_label.pack(pady=10)
 
-    type_label = tk.Label(window, text=f"Type: {', '.join(champion['type'])}", font=("Arial", 14))
-    type_label.pack()
+        label = tk.Label(window, text=f"The winner is {champion['name'].capitalize()}!", font=("Arial", 16))
+        label.pack()
 
-    # Attendre un peu avant de fermer la fenêtre pour que l'utilisateur ait le temps de voir le résultat
-    window.after(5000, window.destroy)
-    window.mainloop()
+        type_label = tk.Label(window, text=f"Type: {', '.join(champion['type'])}", font=("Arial", 14))
+        type_label.pack()
+
+        # Waiting a bit before closing the window, to give enough time to the user to read the content
+        window.after(5000, window.destroy)
+        window.mainloop()
+    except:
+        print("An error occurred.")
 
 def display_start():
-    window = tk.Tk()
-    window.geometry("1000x200")
-    window.title("Starting Pokémon tournament...")
+    '''
+    Using the library Tkinter, generates a window displaying the initialisation of the tournament
+    '''
+    try:
+        window = tk.Tk()
+        window.geometry("1000x200")
+        window.title("Starting Pokémon tournament...")
 
-    label = tk.Label(window, text="Choosing the Pokémon, please wait...", font=("Arial", 16))
-    label.pack()
+        label = tk.Label(window, text="Choosing the Pokémon, please wait...", font=("Arial", 16))
+        label.pack()
 
-    # Attendre un peu avant de fermer la fenêtre pour que l'utilisateur ait le temps de voir le résultat
-    window.after(3000, window.destroy)
-    window.mainloop()
+        # Waiting a bit before closing the window, to give enough time to the user to read the content
+        window.after(3000, window.destroy)
+        window.mainloop()
+    except:
+        print("An error occurred.")
 
 if __name__ == "__main__":
     display_start()
